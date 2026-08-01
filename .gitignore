@@ -1,0 +1,18 @@
+# Local app data / tooling internals
+.freebuff/
+.hermes/
+cleanup/
+
+# Database files (SQLite)
+*.db
+*.db-shm
+*.db-wal
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.vscode/
+.idea/
+node_modules/

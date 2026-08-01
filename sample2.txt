@@ -1,0 +1,549 @@
+# Drift Racer — HTML5 + JS Master Prompt
+
+**You do not need any other mode or exit step.**  
+This entire file **is** the master prompt. Copy **everything from the line `---BEGIN PROMPT---` to `---END PROMPT---`** into your local / offline model in one message and tell it to implement now.
+
+ Companion files in this folder (optional follow-ups if the model skimps):
+- `DRIFT_PHYSICS_PROMPT.md` — physics-only deep dive
+- `DESIGN_SPEC.md` — full design bible
+
+---BEGIN PROMPT---
+
+# BUILD BRIEF: Drift Racer — Single-Shot HTML5 + JavaScript
+
+You are a senior game engineer. Ship a **complete, playable** top-down arcade drift racer as a **single HTML5 build** in **one shot**. Prefer **one file** `index.html` (inline CSS + JS). Acceptable: `index.html` + `game.js`. No frameworks, no npm, no bundler, no physics engines (no Matter/Box2D/Rapier). Pure Canvas 2D + requestAnimationFrame + Web Audio API + localStorage.
+
+Open `index.html` in a browser and the full game works: menu → garage → race → results → rank saved.
+
+If anything in this brief conflicts with “common sense” racing physics, **this brief wins**. Port numbers and step order literally.
+
+---
+
+## 1. Product fantasy
+
+Neon night circuits. The player hangs the car sideways, holds the **optimal slip-angle window**, multiplies style points with combo + countersteer, **charges a mini-turbo off the drift**, **stores** it by tier, and **fires on Space** for an exit burst. Finish clean and fast to climb career rank **D → C → B → A → S**.
+
+Three cars make three games on the same track:
+- **Muscle** — big torque, wild angles, highest drift score mult.
+- **Street** — balanced all-rounder.
+- **Super** — highest top speed, hardest drift threshold, lowest score mult (clean line).
+
+---
+
+## 2. Tech constraints
+
+- Canvas logical resolution **1920×1080**, scale to window with letterbox, `devicePixelRatio` capped (e.g. 2).
+- **Physics fixed timestep 120 Hz** (`dt = 1/120`). Render may use frame dt; gameplay never uses variable-dt physics.
+- Kinematic car only. **Never** rigid-body tire models.
+- Modules as IIFEs or plain functions in one file: `CONFIG`, `Cars`, `Tracks`, `Physics.step`, `Race`, `Render`, `HUD`, `Audio`, `Input`, `Save`, `App` state machine.
+- Touch: on-screen buttons that set the same input flags as keys.
+- First user gesture unlocks AudioContext.
+- `localStorage` key: `drift_racer_html_progress_v1`.
+
+---
+
+## 3. App state machine
+
+```
+TITLE → GARAGE → COUNTDOWN → RACING → FINISHED
+         ↑                      │
+         └──────── R / button ←─┘
+Esc from race → TITLE (or GARAGE). R in FINISHED → same setup COUNTDOWN.
+```
+
+**TITLE:** dark vignette, big “DRIFT RACER” wordmark (canvas text + neon gradient is fine), buttons Race / Quit (Quit can `window.close` or no-op with message).
+
+**GARAGE:** pick car (3), circuit (4), laps (1–10, default 3). Show blurb + power/top/drift stats. Show career rank, best score, races. Start Race → COUNTDOWN.
+
+**COUNTDOWN:** freeze car physics (`active=false`), overlay 3,2,1,GO (~1s each or 3.0s total counting down).
+
+**RACING:** physics on, checkpoints/laps, HUD live.
+
+**FINISHED:** freeze car, bank open drift score, show results card, write save.
+
+---
+
+## 4. Controls
+
+| Action | Keys | Touch |
+|--------|------|-------|
+| Throttle / reverse | W/S or ↑/↓ | ▲ ▼ |
+| Steer | A/D or ←/→ | ◀ ▶ |
+| Drift hold | Shift | DRIFT |
+| Boost fire | Space | BOOST |
+| Brake | B | BRAKE |
+| Reset / rematch | R | — |
+| Menu | Esc | — |
+
+Input snapshot each physics tick:
+```
+throttle ∈ {1, -0.5, 0}
+steer ∈ {-1, 0, 1}   // digital OK
+drift, brake: boolean held
+boost: edge detect on press for fire (not continuous auto-fire)
+```
+
+---
+
+## 5. Coordinate system
+
+Top-down, **+X right, +Y down** (canvas). `heading` radians, 0 = +X.
+
+```
+cos_h = cos(heading); sin_h = sin(heading);
+forward_vel =  vel.x * cos_h + vel.y * sin_h;
+lateral_vel = -vel.x * sin_h + vel.y * cos_h;
+// write-back:
+vel.x =  new_forward * cos_h - new_lateral * sin_h;
+vel.y =  new_forward * sin_h + new_lateral * cos_h;
+```
+
+Helper: `wrapPi(a)` keeps angle in (−π, π].
+
+---
+
+## 6. GLOBAL constants (exact — copy as JS)
+
+```js
+const GLOBAL = {
+  combo_growth_rate: 0.15,
+  combo_grace_time: 1.0,
+  charge_rate: 1.0,
+  charge_max: 3.0,
+  mt_blue_threshold: 0.4,
+  mt_orange_threshold: 1.0,
+  mt_purple_threshold: 2.0,
+  mt_blue_power: 120, mt_orange_power: 200, mt_purple_power: 320,
+  mt_blue_duration: 0.5, mt_orange_duration: 0.8, mt_purple_duration: 1.2,
+  grass_speed_mult: 0.45,
+  cam_smooth: 0.08, cam_lookahead: 0.2,
+  drift_speed_boost_enabled: true,
+  drift_speed_boost_rate: 0.02,
+  drift_speed_boost_max: 0.50,
+  drift_speed_boost_decay: 0.10,
+  air_drag_coeff: 0.0003,
+  rolling_resistance: 0.02,
+  weight_transfer_factor: 0.35,
+  weight_shift_smoothing: 3.0,
+  steering_rack_rate: 3.2,
+  steering_center_spring: 1.6,
+  max_wheel_angle: 0.58,
+  grip_loss_start_speed: 140,
+  grip_loss_full_speed: 520,
+  grip_loss_amount: 0.55,
+  lat_bleed_normal: 0.72,
+  lat_bleed_drift: 0.92,
+  yaw_from_slip: 0.55,
+  yaw_wheel_scale: 2.2,
+  wall_push: 0.28,
+  wall_damp: 0.45,
+  drift_gradual_entry_time: 0.16,
+  drift_gradual_exit_time: 0.28,
+  drift_optimal_angle_low: 0.4,
+  drift_optimal_angle_high: 0.8,
+  drift_over_rotate_threshold: 1.0,
+  drift_angle_optimal_mult: 1.3,
+  drift_angle_over_rotate_penalty: 0.5,
+  drift_countersteer_bonus: 1.15,
+  drift_countersteer_decay_reduction: 0.3,
+  feint_angle_bonus: 0.08,
+};
+```
+
+---
+
+## 7. Car configs (exact)
+
+```js
+const CARS = {
+  muscle: {
+    id:'muscle', name:'Muscle', color:'#ff5701',
+    engine_power:300, max_speed:420,
+    lat_friction_normal:0.62, lat_friction_drift:0.88,
+    drift_bonus:1.3, drift_threshold:0.10,
+    blurb:'Big torque, wild angles. Loves to hang the tail out.'
+  },
+  street: {
+    id:'street', name:'Street', color:'#16a34a',
+    engine_power:260, max_speed:480,
+    lat_friction_normal:0.58, lat_friction_drift:0.86,
+    drift_bonus:1.0, drift_threshold:0.12,
+    blurb:'The all-rounder. Balanced grip, forgiving slides.'
+  },
+  super: {
+    id:'super', name:'Super', color:'#ffffff',
+    engine_power:340, max_speed:560,
+    lat_friction_normal:0.54, lat_friction_drift:0.84,
+    drift_bonus:0.7, drift_threshold:0.16,
+    blurb:'Insane top speed, precise. Rewards a clean line.'
+  }
+};
+const CAR_ORDER = ['muscle', 'street', 'super'];
+```
+
+Car visual: rounded rectangle or simple top-down coupe silhouette ~48×24 world units, nose along heading, body tint = color. Glow ring under car: blue / orange / purple by combo tier or boost.
+
+---
+
+## 8. Car state fields
+
+```
+pos:{x,y}, vel:{x,y}, heading,
+wheel_angle, weight_transfer_s, current_lat_fric,
+drift_angle, drift_score, drift_total, drift_combo, drift_combo_timer,
+drift_charge, drift_active, drift_speed_boost, is_countersteering,
+feint_applied, steer_history:[{t,v}], time_accum,
+boost_active, boost_time, boost_max_time, boost_power, boost_color,
+boost_stored, boost_stored_power, boost_stored_duration, boost_stored_color,
+wall_hit_cooldown, active
+```
+
+`reset(pos, heading)` zeros motion + drift/boost state. Initialize `current_lat_fric` to `car.lat_friction_normal`.
+
+---
+
+## 9. Physics.step — ORDERED (every 1/60 s while `car.active`)
+
+### 0 Surface
+```
+on_track = track.isOnTrack(pos)
+surface_mult = on_track ? 1 : GLOBAL.grass_speed_mult
+spd = Math.hypot(vel.x, vel.y)
+```
+
+### 1 Steering rack
+```
+target = steer * max_wheel_angle
+if (Math.abs(steer) < 0.05) {
+  c = steering_center_spring * dt
+  wheel_angle = Math.abs(wheel_angle) < c ? 0 : wheel_angle - Math.sign(wheel_angle)*c
+} else {
+  d = target - wheel_angle
+  wheel_angle += Math.sign(d) * Math.min(Math.abs(d), steering_rack_rate * dt)
+}
+```
+
+### 2 Weight transfer (keep state for parity)
+```
+accel_factor = throttle*0.7 - (brake ? 0.6 : 0)
+target_wt = accel_factor * weight_transfer_factor
+weight_transfer_s += (target_wt - weight_transfer_s) * Math.min(1, weight_shift_smoothing*dt)
+```
+
+### 3 Drag
+```
+air = air_drag_coeff * spd * spd
+roll = rolling_resistance * Math.max(0, spd)
+total_drag = Math.min(spd, (air+roll)*dt)
+drag_mult = spd > 0.1 ? (spd - total_drag) / spd : 1
+```
+
+### 4 Speed grip loss
+```
+grip_t = clamp((spd - grip_loss_start_speed)/(grip_loss_full_speed - grip_loss_start_speed), 0, 1)
+speed_grip = 1 - grip_t * grip_loss_amount
+```
+
+### 5 World → local vel (formulas in §5)
+
+### 6 Gradual lateral friction
+```
+normal_fric = car.lat_friction_normal * speed_grip * surface_mult
+drift_fric  = car.lat_friction_drift  * speed_grip * surface_mult
+target_fric = drift ? drift_fric : normal_fric
+lerp_rate = 1 / (drift ? drift_gradual_entry_time : drift_gradual_exit_time)
+current_lat_fric += (target_fric - current_lat_fric) * Math.min(1, lerp_rate*dt)
+lat_fric = current_lat_fric
+```
+
+### 7 Lateral PARTIAL BLEED — do NOT hard clamp
+```
+lat_cap = Math.abs(forward_vel) * lat_fric * (drift ? 1.05 : 0.95)
+bleed = drift ? lat_bleed_drift : lat_bleed_normal
+if (Math.abs(lateral_vel) > lat_cap) {
+  excess = Math.abs(lateral_vel) - lat_cap
+  new_lateral = Math.sign(lateral_vel) * (lat_cap + excess * (1 - bleed))
+} else {
+  new_lateral = lateral_vel * (1 - Math.min(1, lat_fric * 2.2 * dt))
+}
+```
+
+### 8 Forward / cap / brake / active boost
+```
+steer_scrub = Math.abs(wheel_angle) * 0.3 * (spd/200)
+new_forward = forward_vel * drag_mult
+new_forward += throttle * car.engine_power * dt
+new_forward -= steer_scrub * spd * dt
+max_spd = car.max_speed * surface_mult * (1 + drift_speed_boost)
+new_forward = clamp(new_forward, -max_spd*0.4, max_spd)
+if (brake && forward_vel > 0)
+  new_forward = Math.max(0, new_forward - car.engine_power*2*dt)
+if (boost_active) {
+  new_forward += boost_power * dt
+  boost_time -= dt
+  if (boost_time <= 0) boost_active = false
+}
+```
+
+### 9 Write-back, yaw, integrate
+```
+// vel write-back §5
+rotate_vel = wheel_angle * (spd/120) * yaw_wheel_scale
+           + new_lateral * yaw_from_slip * 0.012
+heading += rotate_vel * dt
+pos.x += vel.x * dt; pos.y += vel.y * dt
+```
+
+### 10 Soft wall
+Track = closed polyline `points[]` + `width`. Find closest point on segments; `hw = width/2`.
+```
+if (dist > hw) {
+  normal = normalize(pos - closest) // outward
+  pos += normal * (dist - hw) * wall_push
+  if (dot(vel, normal) > 0) vel -= normal * dot(vel,normal) * wall_damp
+  if (wall_hit_cooldown <= 0) {
+    wall_hit_cooldown = 0.3
+    emit wall; wall_hits++
+    if (drift_active && drift_score > 0) {
+      pen = Math.min(drift_score, 100); drift_score -= pen
+    }
+  }
+}
+```
+`isOnTrack`: any segment distance < hw. Distance to segment = classic point-segment clamp t∈[0,1].
+
+### 11 Drift detect
+```
+new_speed = hypot(vel)
+vel_dir = new_speed > 1 ? Math.atan2(vel.y, vel.x) : heading
+raw_slip = wrapPi(heading - vel_dir)
+drift_angle = Math.abs(raw_slip)
+is_drifting = drift && new_speed > 60 && drift_angle > car.drift_threshold
+```
+
+### 12 Feint (Scandinavian flick)
+Ring buffer of `{t, v: wheel_angle}` for last **0.35s**.  
+When `is_drifting` and `!feint_applied` and history has a sign flip with `|wheel|>0.15`: set `feint_applied = true` (optional: nudge perceived angle by `feint_angle_bonus`). Clear `feint_applied` when not drifting.
+
+### 13 Countersteer
+```
+is_countersteering = is_drifting
+  && Math.sign(raw_slip) !== 0 && Math.sign(wheel_angle) !== 0
+  && Math.sign(raw_slip) !== Math.sign(wheel_angle)
+  && Math.abs(wheel_angle) > 0.15
+```
+
+### 14 Score + charge + drift-speed boost
+While `is_drifting`:
+```
+drift_combo += dt
+drift_combo_timer = combo_grace_time
+drift_active = true
+drift_charge = Math.min(charge_max, drift_charge + dt * charge_rate)
+angle_mult = 1
+if (drift_angle >= 0.4 && drift_angle <= 0.8) angle_mult = 1.3
+else if (drift_angle > 1.0) angle_mult = 0.5
+if (is_countersteering) angle_mult *= 1.15
+combo_mult = 1 + drift_combo * combo_growth_rate
+drift_score += drift_angle * new_speed * dt * combo_mult * car.drift_bonus * angle_mult
+if (drift_speed_boost_enabled)
+  drift_speed_boost = Math.min(drift_speed_boost_max, drift_speed_boost + drift_speed_boost_rate * dt)
+// smoke / sparks flags
+```
+
+**On exit edge** (was drifting → not this tick):
+```
+drift_active = false
+if (drift_charge > mt_blue_threshold) {
+  // bank STORED boost by tier — do NOT auto-fire
+  if (drift_charge >= mt_purple_threshold) { power=320; dur=1.2; color='#b450ff' /* or orange-purple brand */ }
+  else if (drift_charge >= mt_orange_threshold) { power=200; dur=0.8; color='#f77f00' }
+  else { power=120; dur=0.5; color='#4cc9f0' }
+  boost_stored = true; store power/duration/color
+}
+drift_charge = 0
+drift_combo = 0   // score still waits for grace bank
+// if not drifting and drift_speed_boost > 0: decay by drift_speed_boost_decay * dt
+```
+
+Tier colors used in shipping feel: blue `#4cc9f0`, orange `#f77f00` / `#ff5701`, high tier can use purple `#b450ff` or deep orange `#ff5701` for purple charge.
+
+### 15 Fire mini-turbo
+```
+if (boostPressedEdge && boost_stored && !boost_active) {
+  boost_active = true
+  boost_time = boost_max_time = boost_stored_duration
+  boost_power = boost_stored_power
+  boost_color = boost_stored_color
+  boost_stored = false
+  // whoosh SFX + camera zoom kick
+}
+```
+
+### 16 Combo bank + timers
+```
+if (wall_hit_cooldown > 0) wall_hit_cooldown -= dt
+if (!is_drifting && drift_combo_timer > 0) {
+  drift_combo_timer -= dt
+  if (drift_combo_timer <= 0) {
+    drift_total += drift_score
+    drift_score = 0
+    drift_combo = 0
+  }
+}
+```
+Visible score = `drift_total + drift_score`.
+
+---
+
+## 10. Tracks
+
+Each track: `{ id, label, difficulty 1-3, width, numCheckpoints, points:[{x,y},...] }` closed loop around origin, radius ~300–500.
+
+**Generators:**
+- **oval** — 72 pts: `a = i/72 * TAU`, `r = 420 + 100*sin(2a) + 60*sin(3a+0.5)`, `(cos(a)*r, sin(a)*r*0.72)`, width 140, checkpoints 4
+- **figure8** — 100 pts: `r = 380 + 60*sin(4a)`, add `sin(2a)*80` on x and `cos(2a)*40` on y, width 140, cp 6
+- **rally** — ~20 base angles with noisy radius ~300–480, width 160, cp 8, close loop to first point
+- **random** — seeded LCG (`state = (state*1103515245+12345)&0x7fffffff`), 36+ pts, radius 300–500, complexity 3–7, width 120–180, cp 8
+
+Checkpoints: indices `floor(i / numCheckpoints * n)` for i in 0..num-1.  
+Start pose: `points[0]`, heading `atan2(p1.y-p0.y, p1.x-p0.x)`.
+
+**Pass checkpoint:** distance to cp < `width/2 + 20`, and `dot(carForward, trackTangent) > -0.3` where tangent is from previous cp toward next. Advance next index; when wrapping so you complete the cycle past the last and land on preparing for cp index related to lap complete (same as shipping: when `next` becomes 1 again after being past start), count a lap.
+
+Draw: dark asphalt polyline stroke width=width, faint border wider, white edge offsets along normals, gold dashed centerline, checker start bar. Night BG gradient `#0a0a12` → `#1a1020` with soft orange/cyan blobs. Off-track darker.
+
+---
+
+## 11. Race result formula
+
+```
+// On finish all laps:
+drift_total += drift_score; drift_score = 0
+elapsed_sec = ...
+drift_bank = Math.floor(drift_total)
+time_bonus = Math.max(0, Math.floor(5000 - elapsed_sec * 20))
+style_bonus = Math.floor(drift_bank * Math.min(0.35, (drift_combo || 0) * 0.03))
+clean_bonus = wall_hits === 0 ? 2000 : 0
+wall_penalty = Math.min(1500, wall_hits * 75)
+final = Math.max(0, drift_bank + time_bonus + style_bonus + clean_bonus - wall_penalty)
+```
+
+Stars: start 1; +1 if final≥4000; +1 if ≥9000; +1 if clean (cap 3).
+
+Career rank by **best_score**: D≥0, C≥4500, B≥9000, A≥15000, S≥25000.
+
+Save JSON: `{ best_score, rank, races, last_car, last_track, last_laps }`.
+
+---
+
+## 12. Camera & VFX
+
+- Camera lerps toward `car.pos + vel * cam_lookahead` (smooth from `cam_smooth`).
+- Zoom ~1.0 default, ~1.12 while `boost_active`.
+- Wall hit → brief camera shake.
+- Tire marks ring buffer (~250) while `drift_active && speed > 30`; thickness scales with angle.
+- Particles: rear smoke while drifting; sparks if angle > 0.2; flame trail when boosting.
+- Floating `+N` / `WALL` labels rise and fade.
+
+---
+
+## 13. HUD (screen space)
+
+- Top-left: speed (floor of |vel|)
+- Top-center: open drift score + combo mult (`1 + drift_combo * 0.15`)
+- Top-right: total visible score, lap `current/total`, timer, car name
+- Bottom-left: mini-turbo bar (charge or remaining boost flash); label “SPACE” when stored ready
+- Drift-boost bar (0..max)
+- Bottom-center: drift-angle gauge — orange shallow / green optimal [0.4–0.8] / red over-rotate
+- Controls hint
+- Huge countdown
+- Results modal: final, stars, rank, breakdown rows, “R retry · Esc menu”
+
+Palette: bg `#12100e`, orange `#ff5701`, green `#16a34a`, gold `#ffd700`, ink `#f5ebe6`, muted `#a8988c`.
+
+---
+
+## 14. Audio (Web Audio — no external files required)
+
+Tiny synth bus after first click:
+- **Music:** dark synthwave pulse (bass arpeggio + pad); start on first gesture
+- **Screech:** filtered noise loop; gain `clamp(drift_angle/1.2, 0.15, 1)` while drifting else 0
+- **Boost:** short noise+sweep whoosh on fire
+- **UI click:** blip
+- **Finish:** short major fanfare
+- **Wall:** low thump
+
+---
+
+## 15. Render loop sketch
+
+```js
+let acc = 0, last = performance.now();
+const STEP = 1/60;
+function frame(t) {
+  const frameDt = Math.min(0.05, (t - last) / 1000); last = t;
+  Input.sample();
+  if (state === 'COUNTDOWN') { /* tick countdown; when 0 begin race car.active=true */ }
+  if (car.active) {
+    acc += frameDt;
+    while (acc >= STEP) {
+      Physics.step(car, Input.snapshot(), track, STEP);
+      Race.afterPhys(car); // checkpoints
+      acc -= STEP;
+    }
+  }
+  // camera, fx decay, hud
+  Render.draw(ctx, cam, track, car, fx);
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+```
+
+---
+
+## 16. Explicit DO NOT
+
+- Do not replace lateral bleed with `clamp(lateral, -cap, cap)`.
+- Do not auto-fire mini-turbo on drift release — bank, then Space.
+- Do not skip gradual friction entry/exit times.
+- Do not omit yaw-from-slip term.
+- Do not use React/Vue/Phaser/npm/Box2D.
+- Do not ship stub physics or “// TODO”.
+- Do not hard-require external art CDNs (procedural canvas art is required to work offline).
+
+---
+
+## 17. Acceptance checklist (self-verify before you finish)
+
+1. Title → Garage → Start → countdown → full race, no console errors.
+2. Muscle drifts easier / scores more per degree than Super; Super reaches higher top speed.
+3. Holding drift at speed leaves lasting slide (lateral velocity nonzero for many frames).
+4. Releasing drift recovers grip over ~0.28s feel, not an instant snap.
+5. Charge past 0.4 / 1.0 / 2.0 s then release stores blue / orange / purple; Space fires once; need a new drift to store again.
+6. Optimal angle band scores more than shallow or over-rotated slides at same speed.
+7. Grass slows hard; walls soft-push; wall hits spoil clean bonus.
+8. Finish shows score breakdown; refresh page keeps best score & rank.
+9. Touch controls work or at least appear when touch is available.
+10. Playable FPS in desktop Chrome/Firefox.
+
+---
+
+## 18. Deliverable format
+
+Return the **complete** source of `index.html` (inline CSS + JS). Optional second file `game.js` only if needed for length.
+
+At the top of the file, a short HTML comment:
+```
+<!-- Drift Racer HTML5
+     Open this file in a browser.
+     WASD drive, Shift drift, Space boost, B brake, R rematch, Esc menu.
+     Three cars, four tracks, climb Rank D→S.
+-->
+```
+
+Style: neon night, readable HUD, satisfying screech and boost. Make it *feel good*.
+
+BEGIN IMPLEMENTATION NOW. Output only the full working source files, no truncated code.
+
+---END PROMPT---

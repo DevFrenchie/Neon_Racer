@@ -25,3 +25,9 @@ _*.js
 
 # Tooling-internal docs (Zenmux env key manager — unrelated to the game)
 ZENMUX_HERMES_GUIDE.md
+
+# Earlier experimental builds pre-dating apex_line.html, and the
+# dev-cycle sample text notes. Kept locally for reference but never
+# shipped to the game repo.
+drift_racer_2d_ui_patched.html
+sample*.txt

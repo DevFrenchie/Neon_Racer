@@ -2,9 +2,7 @@
 
 A single-file HTML5 arcade drift racer. Open the HTML file in any modern browser — no server, no build step, no external assets. Fully offline, all audio synthesized via WebAudio.
 
-**File:** `apex_line.html` (the canonical game file — the in-repo filename, the title in the page is **NEON APEX DRIFT**).
-
-Other HTML files in the repo (`drift_racer_2d_ui_patched.html`, `sample1.txt`–`sample3.txt`) are earlier experimental builds and reference material kept for history.
+**To play:** open **`apex_line.html`** in any modern browser. That single file is the whole game — no server, no build step, no external assets, no installer. Fully offline; all audio synthesized via WebAudio.
 
 ## How to play
 
@@ -115,4 +113,4 @@ node -e "const fs=require('fs');const h=fs.readFileSync('apex_line.html','utf8')
 
 ## Version control
 
-Standard git. The repo was initialised with `git init -b main`, `.gitignore` excludes Freebuff/Hermes internals and local AI cleanup artifacts; the game file, this README, and the design/reference files are tracked.
+Standard git. The repo was initialised with `git init -b main`. `.gitignore` excludes Freebuff/Hermes internals, local AI cleanup artifacts, file backups and scratch validation scripts, and any earlier experimental builds (`drift_racer_2d_ui_patched.html`, `sample*.txt`) that pre-date `apex_line.html`. The tracked surface is intentionally small: `apex_line.html`, `README.md`, and `Image_assets/test_track.png`.

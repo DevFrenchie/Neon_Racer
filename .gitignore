@@ -16,3 +16,12 @@ Thumbs.db
 .vscode/
 .idea/
 node_modules/
+
+# Game file backups (apex_line.html.bak.*) and scratch
+# validation/search scripts (_chk.js, _grep.js, _scope.js etc.)
+# generated during iteration; never meant to ship.
+*.bak*
+_*.js
+
+# Tooling-internal docs (Zenmux env key manager — unrelated to the game)
+ZENMUX_HERMES_GUIDE.md

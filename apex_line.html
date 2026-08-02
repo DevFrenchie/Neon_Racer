@@ -205,42 +205,46 @@
     backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
     padding:16px;font-family:var(--mono);display:none}
   #tunePanel.visible{display:block}
-  #tunePanel h2{color:var(--fg);font-size:14px;letter-spacing:2px;margin:0 0 4px;
+  #tunePanel h2{color:var(--fg);font-size:18px;letter-spacing:2px;margin:0 0 6px;
     text-shadow:0 0 12px rgba(255,138,60,.3)}
-  #tunePanel .tp-sub{font-size:10px;color:var(--faint);margin-bottom:12px;letter-spacing:1px}
-  #tunePanel .tp-btns{display:flex;gap:6px;margin:0 0 12px;flex-wrap:wrap}
-  #tunePanel .tp-btn{font-family:var(--mono);font-size:9px;letter-spacing:2px;cursor:pointer;
+  #tunePanel .tp-sub{font-size:12px;color:var(--dim);margin-bottom:14px;letter-spacing:1px;line-height:1.45}
+  #tunePanel .tp-btns{display:flex;gap:6px;margin:0 0 14px;flex-wrap:wrap}
+  #tunePanel .tp-btn{font-family:var(--mono);font-size:11px;letter-spacing:2px;cursor:pointer;
     color:var(--dim);background:rgba(255,138,60,.08);border:1px solid var(--line);
-    border-radius:7px;padding:7px 10px}
+    border-radius:7px;padding:9px 12px}
   #tunePanel .tp-btn:hover{color:var(--text);background:rgba(255,138,60,.16)}
   #tunePanel .tp-btn.green{color:var(--good);border-color:rgba(47,224,138,.3)}
   #tunePanel .tp-btn.warn{color:var(--hot);border-color:rgba(255,45,120,.3)}
   .tune-group-header{grid-column:1/-1;background:rgba(255,138,60,.08);color:var(--fg);
-    font-size:10px;font-weight:700;letter-spacing:1px;padding:7px 10px;border-radius:6px;
+    font-size:13px;font-weight:700;letter-spacing:2px;padding:9px 12px;border-radius:6px;
     cursor:pointer;display:flex;align-items:center;gap:8px;border:1px solid rgba(255,138,60,.14);
-    margin-top:6px;text-transform:uppercase}
-  .tune-group-header .arrow{display:inline-block;transition:transform .2s;font-size:9px}
+    margin-top:8px;text-transform:uppercase}
+  .tune-group-header .arrow{display:inline-block;transition:transform .2s;font-size:11px}
   .tune-group-header.collapsed .arrow{transform:rotate(-90deg)}
-  .tune-group-content{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;padding:6px 2px}
+  .tune-group-content{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;padding:8px 4px}
   .tune-group-content.collapsed{display:none}
-  .tune-row{display:flex;flex-direction:column;gap:3px}
-  .tune-row label{font-size:9px;color:var(--dim);display:flex;justify-content:space-between;gap:4px}
-  .tune-row label .tune-val{color:var(--fg);font-weight:700}
-  .tune-row input[type=range]{width:100%;height:4px;-webkit-appearance:none;appearance:none;
-    background:rgba(255,138,60,.16);border-radius:2px;outline:none;cursor:pointer}
-  .tune-row input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;
+  .tune-row{display:flex;flex-direction:column;gap:5px;min-width:0}
+  .tune-row label{font-size:13px;color:var(--dim);display:flex;justify-content:space-between;
+    gap:6px;line-height:1.3;min-width:0;overflow-wrap:anywhere;
+    font-family:var(--mono)}
+  .tune-row label .tune-val{color:var(--fg);font-weight:800;font-size:14px;
+    font-variant-numeric:tabular-nums;flex-shrink:0}
+  .tune-row input[type=range]{width:100%;height:5px;-webkit-appearance:none;appearance:none;
+    background:rgba(255,138,60,.18);border-radius:2px;outline:none;cursor:pointer;margin-top:1px}
+  .tune-row input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;height:17px;
     border-radius:50%;background:var(--fg);cursor:pointer;border:2px solid var(--bg);
     box-shadow:0 0 6px rgba(255,138,60,.4)}
-  .tune-row input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;
+  .tune-row input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;
     background:var(--fg);cursor:pointer;border:2px solid var(--bg)}
-  .tune-row .tune-desc{font-size:8.5px;color:var(--faint);line-height:1.3;margin-top:1px}
+  .tune-row .tune-desc{font-size:11.5px;color:var(--dim);line-height:1.5;margin-top:2px;
+    overflow-wrap:anywhere}
   .tune-group-header.quick-header{background:rgba(255,209,102,.14);color:var(--gold);
     border:1px solid rgba(255,209,102,.3);font-weight:700}
   .tune-readout{background:rgba(58,215,255,.05);border:1px solid rgba(58,215,255,.22);
-    border-radius:8px;padding:10px 12px;display:block;margin-bottom:4px}
-  .tune-readout .ro-title{font-size:9px;letter-spacing:2px;color:var(--cyan);margin-bottom:7px;font-weight:700}
-  .tune-readout .ro-li{display:flex;justify-content:space-between;gap:10px;font-size:10px;
-    color:var(--dim);padding:2px 0;font-variant-numeric:tabular-nums}
+    border-radius:8px;padding:12px 14px;display:block;margin-bottom:6px}
+  .tune-readout .ro-title{font-size:12px;letter-spacing:2px;color:var(--cyan);margin-bottom:8px;font-weight:700}
+  .tune-readout .ro-li{display:flex;justify-content:space-between;gap:10px;font-size:12px;
+    color:var(--dim);padding:3px 0;font-variant-numeric:tabular-nums;line-height:1.4}
   .tune-readout .ro-li b{color:var(--text);font-weight:700}
 </style>
 </head>
@@ -444,8 +448,10 @@ const sgn=x=>x>0?1:x<0?-1:0;
 
 /* ---- Global constants (exact spec) ---- */
 const G={
-  comboGrowth:0.15, comboGrace:1.0, chargeRate:1.0, chargeMax:3.0,
-  mtBlue:0.4, mtOrange:1.0, mtPurple:2.0,
+  comboGrowth:0.15, comboGrace:1.0,  chargeRate:1.0, chargeMax:3.0,
+  // Tier thresholds evenly split the meter: blue at 1s, orange at 2s, purple at 3s
+  // (at default chargeRate of 1.0/sec). Each transition = one beat of the build rate.
+  mtBlue:1.0, mtOrange:2.0, mtPurple:3.0,
   mtBluePow:120, mtOrangePow:200, mtPurplePow:320,
   mtBlueDur:0.5, mtOrangeDur:0.8, mtPurpleDur:1.2,
   grassMult:0.45,
@@ -454,10 +460,12 @@ const G={
   chainBonus:250, chainGrace:1.2, chainCharge:0.6,
   airDrag:0.0003, rolling:0.02,
   wtFactor:0.35, wtSmooth:3.0,
-  rackRate:3.2, centerSpring:1.6, maxWheel:0.58,
+  // responsiveness bump (snappier turn-in, less self-centering, more lock)
+  rackRate:4.4, centerSpring:1.1, maxWheel:0.65,
   gripLossStart:140, gripLossFull:520, gripLossAmt:0.55,
-  bleedNormal:0.72, bleedDrift:0.92,
-  yawFromSlip:0.55, yawWheel:2.2,
+  // drift-turn bump (more rear release while sliding + slip drives harder rotation)
+  bleedNormal:0.72, bleedDrift:0.96,
+  yawFromSlip:0.85, yawWheel:2.2,
   wallPush:0.28, wallDamp:0.45,
   entryTime:0.16, exitTime:0.28,
   optLow:0.4, optHigh:0.8, overRot:1.0,
@@ -466,13 +474,13 @@ const G={
 
 /* ---- Cars (exact spec) ---- */
 const CARS={
-  muscle:{id:'muscle',name:'BRUTE', engine:300,max:420,fricN:0.62,fricD:0.88,bonus:1.3,thr:0.10,
+  muscle:{id:'muscle',name:'BRUTE', engine:300,max:420,fricN:0.62,fricD:0.88,bonus:1.3,thr:0.10,camberSpread:1.8,
     tint:'#ff5701',desc:'Big torque, wild angles. Hangs the tail out and scores big per degree.',
     diff:'Loose · score monster',bars:[3,1,3]},
-  street:{id:'street',name:'VECTOR',engine:260,max:480,fricN:0.58,fricD:0.86,bonus:1.0,thr:0.12,
+  street:{id:'street',name:'VECTOR',engine:260,max:480,fricN:0.58,fricD:0.86,bonus:1.0,thr:0.12,camberSpread:1.8,
     tint:'#2fe08a',desc:'The balanced all-rounder. Forgiving grip, honest slides.',
     diff:'Balanced',bars:[2,2,2]},
-  super:{id:'super', name:'HALO',  engine:340,max:560,fricN:0.54,fricD:0.84,bonus:0.7,thr:0.16,
+  super:{id:'super', name:'HALO',  engine:340,max:560,fricN:0.54,fricD:0.84,bonus:0.7,thr:0.16,camberSpread:1.8,
     tint:'#3ad7ff',desc:'Insane top speed, precise. Highest drift threshold — you must commit.',
     diff:'Fast · must commit',bars:[1,3,1]},
 };
@@ -676,7 +684,7 @@ function placeCarAtStart(){
   car.steerHist=[];car.t=0;
   car.boostActive=false;car.boostTime=0;car.boostPow=0;car.stored=false;car.storedTier='';
   car.chain=0;car.driftDir=0;car.chainTimer=0;car.exitBoostTime=0;
-  car.wallCd=0;
+  car.wallCd=0;car.driftBlend=0;   // 0=normal grip, 1=full drift state; smoothed below so releasing drift settles instead of snapping
   // Snap camera to its resting zoom + zero shake so frame 1 paints the final framing.
   // (updateCamera lerps the zoom toward its target each tick; starting at the
   // exact target avoids a 2% zoom-in on race start.)
@@ -1042,59 +1050,60 @@ for(const id of Object.keys(CARS)) STOCK.cars[id]=Object.assign({},CARS[id]);
 
 const TUNABLES=[
   // current car
-  {key:'engine', label:'Engine power',    min:150,max:500, car:true,  group:'Current Car', quick:true, desc:'How hard the car accelerates.'},
-  {key:'max',    label:'Top speed',       min:300,max:700, car:true,  group:'Current Car', quick:true, desc:'Max speed on tarmac, no drift boost.'},
-  {key:'fricN',  label:'Grip (normal)',   min:0.40,max:0.80,car:true, group:'Current Car', desc:'Tire grip when driving straight. Higher = stickier.'},
-  {key:'fricD',  label:'Grip (drift)',    min:0.70,max:0.98,car:true, group:'Current Car', desc:'Grip while drifting. Higher = shorter, snappier slides.'},
-  {key:'bonus',  label:'Drift score mult',min:0.3,max:2.0, car:true,  group:'Current Car', desc:'Score multiplier for this car\'s drifts.'},
-  {key:'thr',    label:'Drift threshold', min:0.05,max:0.30,car:true, group:'Current Car', desc:'Slip angle before a slide counts as a drift. Lower = easier.'},
+  {key:'engine', label:'Engine Power', min:150,max:500, car:true, group:'Chassis', quick:true, desc:'How hard the car pushes off the line. Higher = punchier acceleration, slower top end.'},
+  {key:'max',    label:'Top Speed', min:300,max:700, car:true, group:'Chassis', quick:true, desc:'Top speed on straight tarmac, before drift boost adds anything.'},
+  {key:'fricN',  label:'Straight Grip', min:0.40,max:0.80,car:true, group:'Chassis', desc:'How hard the tires bite going straight. Higher = stickier, less sliding on turn-in.'},
+  {key:'fricD',  label:'Drift Grip', min:0.70,max:0.98,car:true, group:'Chassis', desc:'How much grip remains during a slide. Higher = shorter, snappier slides; lower = longer, lazier slides.'},
+  {key:'bonus',  label:'Drift Score ×', min:0.3,max:2.0, car:true, group:'Chassis', desc:'Multiplier applied to every drift bank earned in this chassis.'},
+  {key:'thr',    label:'Drift Trigger', min:0.05,max:0.30,car:true, group:'Chassis', desc:'Slip angle at which a slide starts scoring as a drift. Lower = easier to enter.'},
   // steering
-  {key:'rackRate',     label:'Rack rate',       min:1.0,max:8.0, group:'Steering'},
-  {key:'centerSpring', label:'Center spring',   min:0.2,max:5.0, group:'Steering'},
-  {key:'maxWheel',     label:'Max wheel angle', min:0.30,max:0.90,group:'Steering'},
+  {key:'rackRate',     label:'Steering Speed', min:1.0,max:8.0, group:'Steering', desc:'How fast the wheels turn when you steer. Higher = more twitchy; lower = more progressive.'},
+  {key:'centerSpring', label:'Wheel Self-Center', min:0.2,max:5.0, group:'Steering', desc:'How strongly the steering snaps back to center. Higher = twitchier; lower = drives where you point it.'},
+  {key:'maxWheel',     label:'Max Turn', min:0.30,max:0.90, group:'Steering', desc:'Maximum front-wheel angle at full lock. Higher = tighter turns; lower = lazier arcs.'},
   // grip & bleed
-  {key:'gripLossStart',label:'Grip-loss start', min:60, max:300, group:'Grip & Bleed'},
-  {key:'gripLossFull', label:'Grip-loss full',  min:300,max:800, group:'Grip & Bleed'},
-  {key:'gripLossAmt',  label:'Grip-loss amount',min:0.1,max:0.9, group:'Grip & Bleed'},
-  {key:'bleedNormal',  label:'Bleed (grip)',    min:0.3,max:0.95,group:'Grip & Bleed'},
-  {key:'bleedDrift',   label:'Bleed (drift)',   min:0.5,max:0.99,group:'Grip & Bleed'},
-  {key:'entryTime',    label:'Drift entry (s)', min:0.02,max:0.6,group:'Grip & Bleed'},
-  {key:'exitTime',     label:'Grip exit (s)',   min:0.05,max:0.8,group:'Grip & Bleed'},
+  {key:'gripLossStart',label:'High-Speed Grip Loss Start', min:60, max:300, group:'Rear Tire Grip', desc:'Speed where high-speed grip starts bleeding off — past this the car feels looser.'},
+  {key:'gripLossFull', label:'High-Speed Grip Loss Max', min:300,max:800, group:'Rear Tire Grip', desc:'Speed at which high-speed grip is fully bled off — past here the car feels very loose.'},
+  {key:'gripLossAmt',  label:'High-Speed Grip Loss Amount', min:0.1,max:0.9, group:'Rear Tire Grip', desc:'How much grip is lost at top speed. Higher = noticeably looser.'},
+  {key:'bleedNormal',  label:'Coast Tire Slip', min:0.3,max:0.99, group:'Rear Tire Grip', desc:'How much rear grip releases while coasting through a turn. Higher = more rear-end looseness on transitions.'},
+  {key:'bleedDrift',   label:'Drift Tire Slip', min:0.5,max:0.99, group:'Rear Tire Grip', desc:'How much rear grip releases while holding a drift. Lower holds the slide tight; higher lets the rear walk wider.'},
+  {key:'entryTime',    label:'Drift Entry Time', min:0.02,max:0.6, group:'Rear Tire Grip', desc:'How fast the car enters drift state when you kick it sideways. Lower = snappier.'},
+  {key:'exitTime',     label:'Drift Exit Time', min:0.05,max:0.8, group:'Rear Tire Grip', desc:'How fast the car settles out of a drift into grip. Lower = snappier recovery.'},
+  {key:'camberSpread', label:'Camber Push',  min:0.5,max:2.5,car:true, group:'Rear Tire Grip', desc:'How far THIS CAR\'s rear walks out laterally during drift — like real negative rear camber, set per chassis. 1.0 = stock drift line; higher = wider, more dramatic slide; lower = tighter, snappier drifts.'},
   // yaw & drag
-  {key:'yawFromSlip',label:'Yaw from slip',min:0.1,max:1.5,group:'Yaw & Drag'},
-  {key:'yawWheel',   label:'Yaw from wheel',min:0.5,max:5.0,group:'Yaw & Drag'},
-  {key:'airDrag',    label:'Air drag',     min:0.00005,max:0.001,group:'Yaw & Drag'},
-  {key:'rolling',    label:'Rolling resist',min:0.0,max:0.1, group:'Yaw & Drag'},
+  {key:'yawFromSlip',  label:'Slip → Spin', min:0.1,max:1.5, group:'Body Rotation', desc:'How much the tail kicking out rotates the car. Higher = car whips around faster once sliding.'},
+  {key:'yawWheel',     label:'Steering Spin', min:0.5,max:5.0, group:'Body Rotation', desc:'How much turning the front wheels spins the body, even at low speed before slip kicks in.'},
+  {key:'airDrag',      label:'Air Drag', min:0.00005,max:0.001, group:'Body Rotation', desc:'Top-speed resistance from air. Higher = lower top speed but more stable at speed.'},
+  {key:'rolling',      label:'Rolling Resistance', min:0.0,max:0.1, group:'Body Rotation', desc:'Baseline tire friction while rolling. Higher = slower acceleration.'},
   // scoring
-  {key:'comboGrowth',  label:'Combo growth',  min:0.0,max:0.5, group:'Scoring'},
-  {key:'comboGrace',   label:'Combo grace (s)',min:0.2,max:3.0,group:'Scoring'},
-  {key:'optLow',       label:'Optimal low',   min:0.1,max:0.6, group:'Scoring'},
-  {key:'optHigh',      label:'Optimal high',  min:0.5,max:1.2, group:'Scoring'},
-  {key:'optMult',      label:'Optimal mult',  min:1.0,max:2.5, group:'Scoring'},
-  {key:'overPenalty',  label:'Over-rot penalty',min:0.1,max:1.0,group:'Scoring'},
-  {key:'counterBonus', label:'Countersteer x',min:1.0,max:1.6, group:'Scoring'},
-  {key:'feintBonus',   label:'Feint bonus',   min:0.0,max:0.3, group:'Scoring'},
+  {key:'comboGrowth',  label:'Combo Growth', min:0.0,max:0.5, group:'Drift Scoring', desc:'How fast your score multiplier builds while holding a clean drift.'},
+  {key:'comboGrace',   label:'Combo Grace', min:0.2,max:3.0, group:'Drift Scoring', desc:'Seconds before your combo multiplier drops if you pause drifting.'},
+  {key:'optLow',       label:'Optimal Slip Min', min:0.1,max:0.6, group:'Drift Scoring', desc:'Lowest slip angle (radians) that still scores the full optimal multiplier.'},
+  {key:'optHigh',      label:'Optimal Slip Max', min:0.5,max:1.2, group:'Drift Scoring', desc:'Highest slip angle (radians) before over-rotation penalty kicks in.'},
+  {key:'optMult',      label:'Optimal Multiplier', min:1.0,max:2.5, group:'Drift Scoring', desc:'Score multiplier when you hold the optimal slip window.'},
+  {key:'overPenalty',  label:'Over-Rotation Penalty', min:0.1,max:1.0, group:'Drift Scoring', desc:'Score multiplier when you spin past the optimal slip angle.'},
+  {key:'counterBonus', label:'Countersteer Bonus', min:1.0,max:1.6, group:'Drift Scoring', desc:'Extra multiplier when you steer into the slide (counter-steer).'},
+  {key:'feintBonus',   label:'Feint Bonus', min:0.0,max:0.3, group:'Drift Scoring', desc:'Bonus awarded when you swing the wheel the other way just before entering a drift.'},
   // mini-turbo (stored — Space to fire)
-  {key:'chargeRate', label:'Charge rate',     min:0.3,max:3.0, group:'Mini-Turbo (Space)', desc:'How fast a drift fills the stored turbo meter.'},
-  {key:'chargeMax',  label:'Charge max',      min:1.0,max:5.0, group:'Mini-Turbo (Space)', quick:true, desc:'Max stored turbo a drift can bank.'},
-  {key:'mtBlue',     label:'Blue threshold',  min:0.1,max:1.0, group:'Mini-Turbo (Space)', desc:'Charge needed for a blue turbo.'},
-  {key:'mtOrange',   label:'Orange threshold',min:0.5,max:1.6, group:'Mini-Turbo (Space)', desc:'Charge needed for an orange turbo.'},
-  {key:'mtPurple',   label:'Purple threshold',min:1.2,max:3.0, group:'Mini-Turbo (Space)', desc:'Charge needed for a purple turbo.'},
-  {key:'mtBluePow',  label:'Blue power',      min:60, max:240, group:'Mini-Turbo (Space)', desc:'Force of a blue turbo burst.'},
-  {key:'mtOrangePow',label:'Orange power',    min:100,max:350, group:'Mini-Turbo (Space)', desc:'Force of an orange turbo burst.'},
-  {key:'mtPurplePow',label:'Purple power',    min:160,max:500, group:'Mini-Turbo (Space)', desc:'Force of a purple turbo burst.'},
+  {key:'chargeRate', label:'Charge Rate', min:0.3,max:3.0, group:'Mini-Turbo (Space)', desc:'How fast the stored mini-turbo fills while drifting.'},
+  {key:'chargeMax',  label:'Max Stored Charge', min:1.0,max:5.0, group:'Mini-Turbo (Space)', quick:true, desc:'Maximum turbo charge your drift can bank.'},
+  {key:'mtBlue',     label:'Blue Threshold', min:0.3,max:2.5, group:'Mini-Turbo (Space)', desc:'Charge banked to fire a blue turbo. Default = 1/3 of the meter → about 1 second of drifting at the default charge rate.'},
+  {key:'mtOrange',   label:'Orange Threshold', min:1.0,max:3.5, group:'Mini-Turbo (Space)', desc:'Charge banked to fire an orange turbo. Default = 2/3 of the meter → about 2 seconds of drifting at the default charge rate.'},
+  {key:'mtPurple',   label:'Purple Threshold', min:2.0,max:5.0, group:'Mini-Turbo (Space)', desc:'Charge banked to fire a purple turbo. Default = a full meter → about 3 seconds of drifting at the default charge rate. Bank the whole bar for max blast.'},
+  {key:'mtBluePow',  label:'Blue Turbo Power', min:60, max:240, group:'Mini-Turbo (Space)', desc:'Forward force of a blue turbo burst.'},
+  {key:'mtOrangePow',label:'Orange Turbo Power', min:100,max:350, group:'Mini-Turbo (Space)', desc:'Forward force of an orange turbo burst.'},
+  {key:'mtPurplePow',label:'Purple Turbo Power', min:160,max:500, group:'Mini-Turbo (Space)', desc:'Forward force of a purple turbo burst.'},
   // drift speed boost (passive — while sliding)
-  {key:'dsbRate',  label:'Boost build rate',  min:0.005,max:0.40,group:'Drift Speed Boost', quick:true, desc:'How fast sliding builds a passive top-speed bonus.'},
-  {key:'dsbMax',   label:'Boost max (+%)',    min:0.10, max:1.0, group:'Drift Speed Boost', quick:true, desc:'Max passive top-speed bonus from drifting (0.5 = +50%).'},
-  {key:'dsbDecay', label:'Boost decay',       min:0.01, max:0.5, group:'Drift Speed Boost', desc:'How fast the passive bonus fades when you stop drifting.'},
+  {key:'dsbRate',  label:'Boost Build Rate', min:0.005,max:0.40, group:'Drift Top-Speed', quick:true, desc:'How fast sliding builds your passive top-speed bonus.'},
+  {key:'dsbMax',   label:'Max Boost Bonus', min:0.10, max:1.0, group:'Drift Top-Speed', quick:true, desc:'Maximum passive top-speed bonus from drifting (0.50 = +50% top speed).'},
+  {key:'dsbDecay', label:'Boost Decay', min:0.01, max:0.5, group:'Drift Top-Speed', desc:'How fast the passive bonus fades when you stop drifting.'},
   // exit kick + drift chain
-  {key:'exitBoostPow', label:'Exit kick power', min:0, max:400, group:'Drift Chain & Exit', desc:'Forward impulse paid out when you release a drift.'},
-  {key:'exitBoostDur', label:'Exit kick (s)',   min:0, max:1.2, group:'Drift Chain & Exit', desc:'How long the exit impulse lasts.'},
-  {key:'chainBonus',   label:'Chain bonus',     min:0, max:1000, group:'Drift Chain & Exit', quick:true, desc:'Score per chain level when you flip drift side.'},
-  {key:'chainGrace',   label:'Chain grace (s)', min:0.2, max:3.0, group:'Drift Chain & Exit', desc:'Time to flip sides before the chain resets.'},
-  {key:'chainCharge',  label:'Chain charge',    min:0, max:2.0, group:'Drift Chain & Exit', desc:'Turbo charge granted on each chain flip.'},
+  {key:'exitBoostPow', label:'Exit Kick Power', min:0, max:400, group:'Drift Chain & Exit', desc:'Forward impulse paid out when you release a clean drift.'},
+  {key:'exitBoostDur', label:'Exit Kick Duration', min:0, max:1.2, group:'Drift Chain & Exit', desc:'How long the exit impulse lasts.'},
+  {key:'chainBonus',   label:'Chain Flip Bonus', min:0, max:1000, group:'Drift Chain & Exit', quick:true, desc:'Score per chain level when you flip the drift the other way.'},
+  {key:'chainGrace',   label:'Chain Flip Window', min:0.2, max:3.0, group:'Drift Chain & Exit', desc:'Time window to flip the drift side before chain bonus resets.'},
+  {key:'chainCharge',  label:'Chain Charge Bonus', min:0, max:2.0, group:'Drift Chain & Exit', desc:'Turbo charge granted on each chain flip.'},
   // surface
-  {key:'grassMult',label:'Grass speed mult',min:0.2,max:0.8, group:'Surface'},
+  {key:'grassMult',label:'Off-Track Grip', min:0.2,max:0.8, group:'Track Surface', desc:'Speed multiplier when you leave the track surface. Lower = slippier and slower off-track.'},
 ];
 const tunePending={};
 
@@ -1323,14 +1332,22 @@ function step(dt){
   const normalFric=c.fricN*speedGrip*surfaceMult;
   const driftFric =c.fricD*speedGrip*surfaceMult;
   car.latFric+=((inp.drift?driftFric:normalFric)-car.latFric)*Math.min(1,(inp.drift?1/G.entryTime:1/G.exitTime)*dt);
+  car.driftBlend+=((inp.drift?1:0)-car.driftBlend)*Math.min(1,(inp.drift?1/G.entryTime:1/G.exitTime)*dt);
   const latFric=car.latFric;
 
   // 7 lateral PARTIAL BLEED (never hard clamp)
-  const latCap=Math.abs(fwdVel)*latFric*(inp.drift?1.05:0.95);
-  const bleed=inp.drift?G.bleedDrift:G.bleedNormal;
+  // All three knobs smoothly track car.driftBlend (smoothed above over
+  // entryTime/exitTime) instead of snapping on inp.drift — releasing drift
+  // settles the car into grip rather than snapping back to 100 %.
+  //   • latCap factor : 0.95 → 1.05    (drift side bites a bit more)
+  //   • camberCap     : 1.0   → c.camberSpread  (envelope, not velocity)
+  //   • bleed         : bleedNormal → bleedDrift
+  const latCap=Math.abs(fwdVel)*latFric*(0.95+0.10*car.driftBlend);
+  const camberCap=latCap*(1+(c.camberSpread-1)*car.driftBlend);
+  const bleed=G.bleedNormal+(G.bleedDrift-G.bleedNormal)*car.driftBlend;
   let newLat;
-  if(Math.abs(latVel)>latCap){
-    newLat=sgn(latVel)*(latCap+(Math.abs(latVel)-latCap)*(1-bleed));
+  if(Math.abs(latVel)>camberCap){
+    newLat=sgn(latVel)*(camberCap+(Math.abs(latVel)-camberCap)*(1-bleed));
   }else{
     newLat=latVel*(1-Math.min(1,latFric*2.2*dt));
   }

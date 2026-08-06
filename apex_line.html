@@ -457,9 +457,10 @@
 
 <script>
 "use strict";
-function updateUiScale(){const baseScale=Math.min(window.innerWidth/1280,window.innerHeight/720);const scale=clamp(baseScale,0.62,1);document.documentElement.style.setProperty('--ui-scale',scale.toFixed(3));}
+function updateUiScale(){const baseScale=Math.min(window.innerWidth/1280,window.innerHeight/720);const scale=Math.max(0.62,Math.min(1,baseScale));document.documentElement.style.setProperty('--ui-scale',scale.toFixed(3));}
 updateUiScale();
-window.addEventListener('resize',updateUiScale);
+window.addEventListener('resize',()=>{updateUiScale();resize();});
+if(window.visualViewport)window.visualViewport.addEventListener('resize',()=>{updateUiScale();resize();});
 /* ============================================================================
    NEON APEX DRIFT
    Kinematic slip-angle drift model with partial lateral bleed.
@@ -1586,7 +1587,12 @@ function updateParticles(dt){
 ============================================================================ */
 function updateCamera(dt){
   const spd=Math.hypot(car.vel.x,car.vel.y);
-  const tx=car.pos.x+car.vel.x*0.28,ty=car.pos.y+car.vel.y*0.28;
+  // Keep the car near the visual center on narrow touch screens. The desktop
+  // look-ahead is useful at speed, but it pushes the car noticeably off-center
+  // on an iPhone where the viewport is much narrower.
+  const narrowTouch=('ontouchstart' in window||navigator.maxTouchPoints>0)&&Math.min(W,H)<720;
+  const lookAhead=narrowTouch?0.04:0.28;
+  const tx=car.pos.x+car.vel.x*lookAhead,ty=car.pos.y+car.vel.y*lookAhead;
   camera.x=lerp(camera.x,tx,Math.min(1,6*dt));
   camera.y=lerp(camera.y,ty,Math.min(1,6*dt));
   // Auto-zoom baseline reads the speed/boost/kick for a sense of speed, and is now

@@ -69,6 +69,7 @@ A live "WHAT THESE KNOBS DO" readout translates the current slider values into t
 ## Scoring & physics
 
 - **Drift model** — kinematic slip-angle with *partial* lateral bleed (no hard clamp), so cars drift predictably and recover smoothly.
+- **Traction-gated yaw** — slip→spin rotation and lateral scrub are scaled by drift state (`driftBlend`): while drifting the tail swings the nose around, but off drift the excess lateral velocity is bled up to ~4.5× faster and barely rotates the car, so normal driving tracks the line with full traction instead of following the leftover curve from a released drift.
 - **Physics step** — fixed 60 Hz internal tick with accumulator and dt clamp (`dt > 0.1 → 0.1`). All `step()` ordering follows a reference spec (surface → steering → weight transfer → drag → speed grip loss → world→local → gradual lat-friction → partial bleed → yaw → integrate → soft wall).
 - **Drift detection** — `inp.drift && speed > 60 && driftAngle > car.thr`. `driftAngle` is the heading-vs-velocity delta.
 - **Slip window** — `optLow` (0.4) → `optHigh` (0.8) gives a 1.3× score multiplier. **Countersteer** adds another `counterBonus` (1.15×). **Over-rot** (>1.0 rad) drops to `overPenalty` (0.5×). A **feint** (a swing of the wheel sign before entering a drift) grants `feintBonus`.

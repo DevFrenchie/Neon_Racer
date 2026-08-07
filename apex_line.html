@@ -458,14 +458,15 @@ const G={
   dsbRate:0.18, dsbMax:0.50, dsbDecay:0.10,
   exitBoostPow:180, exitBoostDur:0.4,
   chainBonus:250, chainGrace:1.2, chainCharge:0.6,
-  airDrag:0.0003, rolling:0.02,
+  airDrag:0.00005, rolling:0.034,
   wtFactor:0.35, wtSmooth:3.0,
   // responsiveness bump (snappier turn-in, less self-centering, more lock)
   rackRate:4.4, centerSpring:1.1, maxWheel:0.65,
   gripLossStart:140, gripLossFull:520, gripLossAmt:0.55,
   // drift-turn bump (more rear release while sliding + slip drives harder rotation)
   bleedNormal:0.72, bleedDrift:0.96,
-  yawFromSlip:0.85, yawWheel:2.2,
+  // user-baked defaults: gentle slip→spin, more steering spin, near-zero air drag, higher rolling drag
+  yawFromSlip:0.1, yawWheel:2.5,
   wallPush:0.28, wallDamp:0.45,
   entryTime:0.16, exitTime:0.28,
   optLow:0.4, optHigh:0.8, overRot:1.0,
@@ -1345,11 +1346,21 @@ function step(dt){
   const latCap=Math.abs(fwdVel)*latFric*(0.95+0.10*car.driftBlend);
   const camberCap=latCap*(1+(c.camberSpread-1)*car.driftBlend);
   const bleed=G.bleedNormal+(G.bleedDrift-G.bleedNormal)*car.driftBlend;
+  const traction=1-car.driftBlend; // 0 while drifting, 1 on full grip
   let newLat;
   if(Math.abs(latVel)>camberCap){
-    newLat=sgn(latVel)*(camberCap+(Math.abs(latVel)-camberCap)*(1-bleed));
+    // Traction-weighted bleed: on drift release (driftBlend→0) the excess
+    // lateral velocity above the shrinking grip cap is scrubbed up to ~4.5×
+    // faster, so the tail plants into the line instead of walking the car
+    // through the leftover arc. At full drift (traction 0) nothing changes;
+    // capped at 0.95 to stay a partial bleed (no hard clamp).
+    const bleedKill=Math.min(0.95,(1-bleed)*(1+3.5*traction));
+    newLat=sgn(latVel)*(camberCap+(Math.abs(latVel)-camberCap)*bleedKill);
   }else{
-    newLat=latVel*(1-Math.min(1,latFric*2.2*dt));
+    // Traction-weighted decay: while drifting (driftBlend→1) lateral velocity
+    // persists so slides carry; off drift (driftBlend→0) residual lateral
+    // velocity is killed up to ~3× faster so the car plants straight.
+    newLat=latVel*(1-Math.min(1,latFric*2.2*(1+2.0*traction)*dt));
   }
 
   // 8 forward force / caps / brake / boost
@@ -1371,7 +1382,12 @@ function step(dt){
   // 9 local -> world, yaw, integrate
   car.vel.x=newFwd*ch-newLat*sh;
   car.vel.y=newFwd*sh+newLat*ch;
-  car.heading+=(car.wheel*(spd/120)*G.yawWheel+newLat*G.yawFromSlip*0.012)*dt;
+  // Slip→spin is gated by drift state: driftBlend 1 keeps the full tail-swing
+  // (sliding rotates the nose around); near 0 the residual slip barely rotates
+  // the car, so normal driving tracks the steering line instead of following
+  // the leftover curve from a just-released drift.
+  const slipYaw=G.yawFromSlip*(0.15+0.85*car.driftBlend);
+  car.heading+=(car.wheel*(spd/120)*G.yawWheel+newLat*slipYaw*0.012)*dt;
   car.pos.x+=car.vel.x*dt;car.pos.y+=car.vel.y*dt;
 
   // 10 soft wall (push INWARD)

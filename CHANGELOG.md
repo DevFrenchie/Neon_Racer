@@ -7,6 +7,28 @@ and the project currently follows light **Calendar Versioning** (CalVer) rather 
 
 ---
 
+## [Unreleased]
+
+### Changed
+
+- **Traction-gated slip rotation.** `Slip → Spin` yaw now scales with drift
+  state (`slipYaw = yawFromSlip × (0.15 + 0.85·driftBlend)`), and lateral
+  scrub ramps up as `driftBlend → 0` — excess lateral velocity above the
+  grip cap is bled off up to ~4.5× faster on exit, and residual lateral
+  velocity in the grip regime decays ~3× faster. Drifts keep their full
+  tail-swing; releasing a drift now plants the car straight instead of
+  coasting through the leftover curve.
+
+### Changed (stock tuning defaults)
+
+- **New baked-in defaults** (global, apply to every chassis): `Slip → Spin`
+  0.85 → **0.1**, `Steering Spin` 2.2 → **2.5**, `Air Drag` 0.0003 →
+  **0.00005**, `Rolling Resistance` 0.02 → **0.034**. Slip-driven rotation is
+  much gentler by default (wide, lazy drift arcs), steering does more of the
+  turning, and top speed is trimmed slightly by extra rolling drag.
+
+---
+
 ## [1.0.0] — 2026-08-01
 
 The first properly-numbered release. Lands two commits that close out the

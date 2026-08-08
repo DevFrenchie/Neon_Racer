@@ -18,6 +18,8 @@ A single-file HTML5 arcade drift racer. Open the HTML file in any modern browser
 | **Point-to-drive** | **hold left mouse** (or hold finger on mobile) — direction aims the nose, distance = throttle |
 | **Camera zoom** | **scroll wheel** on the canvas (race mode) |
 | **Reset zoom** | **middle-click** on the canvas (race mode) |
+| **Test Pad car** | **1 / 2 / 3** = BRUTE / VECTOR / HALO (Test Pad only) |
+| **Toggle tuner** | Click the chevron on the tuner edge (Test Pad) |
 
 On touch devices, an on-screen pad appears (▲ ▼ ◀ ▶ + DRIFT / BRAKE / BOOST).
 
@@ -53,7 +55,7 @@ Open from **Garage → Track editor** (or `gEditor`).
 
 ## Tune panel
 
-Open from **Garage → Tune setup** (or `gTune`).
+Open from **Garage → Tune setup** (or `gTune`). From the garage you can also jump straight into **Test pad · tune live** after a race. In Test Pad, close the panel with **CLOSE** or the edge chevron; the chevron remains available to slide the tuner back in.
 
 Sliders edit **per-car** stats (shown on the currently selected chassis) and **global** physics constants. The file ships with all sliders at their stock values; you can tune live without persisting, or **Set as default** to write them to `localStorage` (`neonApexTuning_v2`), where they auto-load on every boot.
 
@@ -86,6 +88,8 @@ A free-drive parking lot accessed from the **Title** screen via **TEST PAD · TU
 - Renders the same reference image used during development — `Image_assets/test_track.png` (1376 × 768 px). The file is also inlined as a `data:image/png;base64,…` URL inside `apex_line.html` so the build remains a single self-contained HTML file offline; if you don't need that, swap the loader to `'Image_assets/test_track.png'` and the HTML shrinks by roughly 80%.
 - The image is drawn at `IMAGE_SCALE = 1.62` so it reads at near real-scale. The dashed orange outline on top of the image is the actual cp perimeter — the soft-wall is keyed off `closestOnTrack`, not the image bounds.
 - The **tune panel** is opened automatically at entry (`tuneOpen()` → `tuneBuild()` + `tuneSyncPanel()`), so every slider populates from live tune state and dragging changes the car in real time.
+- While testing, press **1 / 2 / 3** to swap BRUTE / VECTOR / HALO. The car resets cleanly at the pad center and the tuner re-syncs to the selected chassis.
+- The right-edge **chevron** slides the tuner off-screen and brings it back without losing the current tune. This is a hide/show action, not a reset.
 - No countdown, no finish line, no progress tracking. Drive in circles if you want.
 
 ## Camera zoom + driving feel

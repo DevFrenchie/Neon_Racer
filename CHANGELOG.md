@@ -9,6 +9,11 @@ and the project currently follows light **Calendar Versioning** (CalVer) rather 
 
 ## [Unreleased]
 
+### Added
+
+- **Test Pad car switching and tuner recovery.** The existing 1/2/3 shortcut now requires the active Test Pad state, uses the actual test-pad track definition, resets the selected car cleanly, and refreshes the tuner for BRUTE / VECTOR / HALO. Garage now has a direct **Test pad · tune live** entry point for post-race tuning.
+- **Sliding tuner chevron.** The Test Pad tuner can be hidden with its right-edge chevron and reopened from the persistent edge handle without losing live values.
+
 ### Changed
 
 - **Traction-gated slip rotation.** `Slip → Spin` yaw now scales with drift

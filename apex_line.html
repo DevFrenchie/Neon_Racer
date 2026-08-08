@@ -203,8 +203,15 @@
   #tunePanel{position:fixed;top:0;right:0;width:330px;height:100vh;z-index:60;overflow-y:auto;
     background:rgba(24,16,32,.96);border-left:1px solid var(--line);
     backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
-    padding:16px;font-family:var(--mono);display:none}
-  #tunePanel.visible{display:block}
+    padding:16px;font-family:var(--mono);display:block;
+    transform:translateX(100%);transition:transform .28s cubic-bezier(.22,.75,.25,1);pointer-events:none}
+  #tunePanel.visible{transform:translateX(0);pointer-events:auto}
+  #tunePanelPeek{position:fixed;top:50%;right:0;z-index:61;width:30px;height:76px;transform:translateY(-50%);display:none;align-items:center;justify-content:center;border:1px solid var(--line);border-right:0;border-radius:10px 0 0 10px;background:rgba(24,16,32,.96);color:var(--fg);font:700 20px/1 var(--mono);cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.35);transition:right .28s cubic-bezier(.22,.75,.25,1),color .15s,background .15s}
+  #tunePanelPeek:hover{color:var(--gold);background:var(--panel2)}
+  #tunePanelPeek.open{right:330px}
+  #tunePanelPeek .peek-icon{display:block;transform:translateX(-1px);transition:transform .28s}
+  #tunePanelPeek.open .peek-icon{transform:rotate(180deg) translateX(-1px)}
+  @media(max-width:600px){#tunePanel{width:min(330px,92vw)}#tunePanelPeek.open{right:min(330px,92vw)}}
   #tunePanel h2{color:var(--fg);font-size:18px;letter-spacing:2px;margin:0 0 6px;
     text-shadow:0 0 12px rgba(255,138,60,.3)}
   #tunePanel .tp-sub{font-size:12px;color:var(--dim);margin-bottom:14px;letter-spacing:1px;line-height:1.45}
@@ -345,6 +352,7 @@
 </div>
 
 <!-- Tune panel -->
+<button id="tunePanelPeek" aria-label="Show tuning panel" title="Show tuning panel"><span class="peek-icon">‹</span></button>
 <div id="tunePanel">
   <h2>TUNE — <span id="tpCar">BRUTE</span></h2>
   <div class="tp-sub">Sliders edit the selected car + globals. APPLY is session-only; SET AS DEFAULT persists and auto-loads every boot.</div>
@@ -409,6 +417,7 @@
     <div class="row" style="margin-top:12px">
       <button class="ghost-btn" id="gEditor">Track editor</button>
       <button class="ghost-btn" id="gTune">Tune setup</button>
+      <button class="ghost-btn" id="gTestPad">Test pad · tune live</button>
     </div>
     <div class="career">
       <span>Career rank <span class="rankbadge" id="cRank">D</span></span>
@@ -1278,11 +1287,29 @@ function tuneRestoreStock(){
   tuneSyncPanel();
 }
 function tuneOpen(){
+  el('tunePanelPeek').style.display='flex';
   el('tunePanel').classList.add('visible');
+  el('tunePanelPeek').classList.add('open');
+  el('tunePanelPeek').setAttribute('aria-label','Hide tuning panel');
+  el('tunePanelPeek').title='Hide tuning panel';
   tuneBuild();          // builds sliders from live values
   tuneSyncPanel();
 }
-function tuneClose(){ el('tunePanel').classList.remove('visible'); }
+function tuneClose(){
+  el('tunePanel').classList.remove('visible');
+  el('tunePanelPeek').style.display='flex';
+  el('tunePanelPeek').classList.remove('open');
+  el('tunePanelPeek').setAttribute('aria-label','Show tuning panel');
+  el('tunePanelPeek').title='Show tuning panel';
+}
+function tuneToggle(){
+  if(el('tunePanel').classList.contains('visible')){tuneClose();return;}
+  tuneOpen();
+}
+function tuneDisable(){
+  tuneClose();
+  el('tunePanelPeek').style.display='none';
+}
 
 // boot: apply persisted defaults on top of stock (globals + every saved car)
 tuneApplySaved(tuneGetSaved());
@@ -2050,19 +2077,21 @@ cv.addEventListener('touchend',e=>{e.preventDefault();ptrUp();},{passive:false})
 cv.addEventListener('touchcancel',e=>{e.preventDefault();ptrUp();},{passive:false});
 
 function swapCarInTestPad(newId){
-  if(race.state!=='race'||!track||!track.testpad)return;
+  if(!testMode||race.state!=='race'||!track||!track.def||!track.def.testpad||!CARS[newId])return false;
+  if(carCfg.id===newId)return true;
   sfx('click');
   carCfg=CARS[newId];
-  placeCarAtStart();                  // resets pos/heading/vel/state cleanly
-  if(el('tunePanel').classList.contains('visible')){tuneBuild();tuneSyncPanel();}
+  placeCarAtStart();
+  tuneBuild();tuneSyncPanel();
+  toast('TEST PAD · '+carCfg.name+' · '+({'muscle':'1','street':'2','super':'3'})[newId]);
+  return true;
 }
 window.addEventListener('keydown',e=>{
   const k=e.key.toLowerCase();input.keys[k]=true;
   // 1/2/3 car swap in Test Pad mode — no-op outside testpad / outside race
-  if(race.state==='race'&&track&&track.testpad){
-    if(e.key==='1'){swapCarInTestPad('muscle');return;}
-    if(e.key==='2'){swapCarInTestPad('street');return;}
-    if(e.key==='3'){swapCarInTestPad('super');return;}
+  if(testMode&&race.state==='race'&&track&&track.def&&track.def.testpad){
+    const padCar={'1':'muscle','2':'street','3':'super'}[e.key];
+    if(padCar){e.preventDefault();swapCarInTestPad(padCar);return;}
   }
   if(e.key==='Shift')input.drift=true;
   if(e.key===' '||e.code==='Space'){input.boost=true;e.preventDefault();}
@@ -2144,6 +2173,8 @@ el('gEditor').onclick=()=>{initAudio();sfx('click');editorOpen();};
 /* tune panel */
 function tpStatus(msg){ el('tpStatus').textContent=msg; setTimeout(()=>{ if(el('tpStatus').textContent===msg) el('tpStatus').textContent=''; },2400); }
 el('gTune').onclick=()=>{initAudio();sfx('click');tuneOpen();};
+el('gTestPad').onclick=()=>{initAudio();sfx('click');startTestMode();};
+el('tunePanelPeek').onclick=()=>{initAudio();sfx('click');tuneToggle();};
 el('tpClose').onclick=tuneClose;
 el('tpApply').onclick=()=>{tuneApply();sfx('click');tpStatus('Applied for this session');};
 el('tpDefault').onclick=()=>{tuneSetDefault();sfx('charge');tpStatus('Saved as default — auto-loads at boot');};
@@ -2195,7 +2226,7 @@ function startRace(){
   testMode=false;
   el('pGarage').textContent='GARAGE';
   el('uMenu').textContent='GARAGE · ESC';
-  el('tunePanel').classList.remove('visible');
+  tuneDisable();
   race.state='race';race.lap=0;race.next=0;race.finished=false;race.started=false;race.paused=false;
   race.wallHits=0;race.clean=true;race.bestLap=null;race.elapsed=0;
   placeCarAtStart();
@@ -2210,7 +2241,7 @@ function resetToRace(){
   testMode=false;
   el('pGarage').textContent='GARAGE';
   el('uMenu').textContent='GARAGE · ESC';
-  el('tunePanel').classList.remove('visible');
+  tuneDisable();
   race.lap=0;race.next=0;race.finished=false;race.started=false;race.paused=false;
   race.wallHits=0;race.clean=true;race.bestLap=null;race.elapsed=0;
   el('pause').classList.add('hidden');
@@ -2228,7 +2259,7 @@ function toGarage(){
   testMode=false;
   el('pGarage').textContent='GARAGE';
   el('uMenu').textContent='GARAGE · ESC';
-  el('tunePanel').classList.remove('visible');
+  tuneDisable();
   race.state='garage';race.started=false;race.finished=true;race.paused=false;
   el('pause').classList.add('hidden');
   el('hud').classList.add('hidden');el('utils').classList.add('hidden');
@@ -2271,7 +2302,7 @@ function toTitle(){
   testMode=false;
   el('pGarage').textContent='GARAGE';
   el('uMenu').textContent='GARAGE · ESC';
-  el('tunePanel').classList.remove('visible');
+  tuneDisable();
   race.state='title';race.started=false;race.finished=true;race.paused=false;
   el('pause').classList.add('hidden');
   el('hud').classList.add('hidden');el('utils').classList.add('hidden');
